@@ -281,7 +281,17 @@
       <!-- Custom Javascript -->
       <script>
         $(document).ready(function() {
-          $('#dataTableTransactions').DataTable();
+          $('#dataTableTransactions').DataTable({
+             'columnDefs': [
+              {
+                  "targets": 0, // your case first column
+                  "className": "text-center"
+             },
+             {
+                  "targets": 4,
+                  "className": "text-left",
+             }],
+          });
         });
       </script>
       <?php

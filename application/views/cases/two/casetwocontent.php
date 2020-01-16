@@ -17,7 +17,10 @@
   </div>
 </div>
 
-
+<?php
+if($this->session->role == 'maker')
+{
+  ?>
 <!-- Input Form -->
 <div class="row">
   <div class="col-lg-6 mb-4">
@@ -73,6 +76,9 @@
     </div>
   </div>
 </div>
+  <?php
+}
+?>
 
 <!-- Transaction Table -->
 <div class="row">
@@ -86,22 +92,55 @@
           <table class="table table-bordered" id="dataTableTransactions" width="100%" cellspacing="0">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Office</th>
-                <th>Age</th>
-                <th>Start date</th>
-                <th>Salary</th>
+                <th>Plus/Minus</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Tiger Nixon</td>
-                <td>System Architect</td>
-                <td>Edinburgh</td>
-                <td>61</td>
-                <td>2011/04/25</td>
-                <td>$320,800</td>
+                <td><i class="fas fa-plus text-success"></i></td>
+                <td>999,999,999</td>
+                <td>Enter my description 50 character in here... Yuhuu</td>
+                <td>Approve</td>
+                <td>
+                  <?php
+                  if($this->session->role == 'maker')
+                  {
+                    ?>
+                    <button class="btn btn-primary btn-icon-split" disabled>
+                      <span class="icon text-white">
+                        <i class="fas fa-edit"></i>
+                      </span>
+                      <span class="text text-white">Edit</span>
+                    </button>
+                    <button class="btn btn-danger btn-icon-split">
+                      <span class="icon text-white">
+                        <i class="fas fa-trash"></i>
+                      </span>
+                      <span class="text text-white">Cancel</span>
+                    </button>
+                    <?php
+                  }else{
+                    ?>
+                    <button class="btn btn-success btn-icon-split" disabled>
+                      <span class="icon text-white">
+                        <i class="fas fa-check"></i>
+                      </span>
+                      <span class="text text-white">Approve</span>
+                    </button>
+                    <button class="btn btn-danger btn-icon-split">
+                      <span class="icon text-white">
+                        <i class="fas fa-times"></i>
+                      </span>
+                      <span class="text text-white">Reject</span>
+                    </button>
+                    <?php
+                  }
+                  ?>
+                </td>
               </tr>
             </tbody>
           </table>
