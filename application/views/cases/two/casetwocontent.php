@@ -89,9 +89,10 @@ if($this->session->role == 'maker')
       </div>
       <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-bordered" id="dataTableTransactions" width="100%" cellspacing="0">
+          <table class="table table-bordered table-hover" id="dataTableTransactions" width="100%" cellspacing="0">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Plus/Minus</th>
                 <th>Amount</th>
                 <th>Description</th>
@@ -101,6 +102,7 @@ if($this->session->role == 'maker')
             </thead>
             <tbody>
               <tr>
+                <td>1</td>
                 <td><i class="fas fa-plus text-success"></i></td>
                 <td>999,999,999</td>
                 <td>Enter my description 50 character in here... Yuhuu</td>

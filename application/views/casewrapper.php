@@ -277,23 +277,10 @@
       <script src="<?php echo base_url();?>/assets/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
       <!-- Page level custom scripts -->
-      <script src="<?php echo base_url();?>/assets/js/custom/caseone.js"></script>
+      <script src="<?php echo base_url();?>/assets/js/custom/casetwo.js"></script>
+      
       <!-- Custom Javascript -->
-      <script>
-        $(document).ready(function() {
-          $('#dataTableTransactions').DataTable({
-             'columnDefs': [
-              {
-                  "targets": 0, // your case first column
-                  "className": "text-center"
-             },
-             {
-                  "targets": 4,
-                  "className": "text-left",
-             }],
-          });
-        });
-      </script>
+      
       <?php
     }
     ?>
