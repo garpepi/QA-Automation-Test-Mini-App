@@ -25,60 +25,9 @@
   <!-- Page Wrapper -->
   <div id="wrapper">
 
-    <!-- Sidebar -->
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-
-      <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-        <div class="sidebar-brand-icon rotate-n-15">
-          <i class="fas fa-wrench"></i>
-        </div>
-        <div class="sidebar-brand-text mx-3" style="font-size: small;"><?php echo $this->config->item('siteName');?></div>
-      </a>
-
-      <!-- Divider -->
-      <hr class="sidebar-divider my-0">
-
-      <!-- Nav Item - Home -->
-      <li class="nav-item active">
-        <a class="nav-link" href="<?php echo base_url();?>">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Home</span></a>
-      </li>
-
-      <!-- Divider -->
-      <hr class="sidebar-divider">
-
-      <!-- Heading -->
-      <div class="sidebar-heading">
-        Case
-      </div>
-
-      <!-- Nav Item - Charts -->
-      <li class="nav-item">
-        <a class="nav-link" href="<?php echo base_url();?>caseone">
-          <i class="fa-stack">
-              <!-- The icon that will wrap the number -->
-              <span class="fa fa-circle-o fa-stack-2x"></span>
-              <!-- a strong element with the custom content, in this case a number -->
-              <strong class="fa-stack-1x">
-                  1    
-              </strong>
-          </i>
-          
-          <span>One</span></a>
-      </li>
-
-      <!-- Divider -->
-      <hr class="sidebar-divider d-none d-md-block">
-
-      <!-- Sidebar Toggler (Sidebar) -->
-      <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle"></button>
-      </div>
-
-    </ul>
-    <!-- End of Sidebar -->
+    <?php
+    $this->load->view('sidebar',array('CaseNumber' => array('number' => 0)));
+    ?>
 
     <!-- Content Wrapper -->
     <div id="content-wrapper" class="d-flex flex-column">
@@ -173,12 +122,6 @@
   <!-- Custom scripts for all pages-->
   <script src="<?php echo base_url();?>/assets/js/sb-admin-2.min.js"></script>
 
-  <!-- Page level plugins -->
-  <script src="<?php echo base_url();?>/assets/vendor/chart.js/Chart.min.js"></script>
-
-  <!-- Page level custom scripts -->
-  <script src="<?php echo base_url();?>/assets/js/demo/chart-area-demo.js"></script>
-  <script src="<?php echo base_url();?>/assets/js/demo/chart-pie-demo.js"></script>
 
 </body>
 

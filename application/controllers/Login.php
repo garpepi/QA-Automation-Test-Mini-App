@@ -32,32 +32,15 @@ class Login extends CI_Controller {
 	
   function checkUsernamePassword()
   {
-    $users = array(
-			array(
-				'username' => 'maker',
-				'password' => 'makercreatepassword',
-				'role' => 'maker'
-			),
-			array(
-				'username' => 'checker',
-				'password' => 'checkercheckpassword',
-				'role' => 'checker'
-			)
-		);
-    
-    $usrFind = array_search(strtolower($this->input->post('username')), array_column($users, 'username'));
     try{
-      if($usrFind !== false) {
-        if($users[$usrFind]['password'] != $this->input->post('password'))
+      $this->load->model('loginmodel');
+      $user = $this->loginmodel->checkUsername($this->input->post('username'));
+      if(!empty($user)) {
+        if('Abcd1234' != $this->input->post('password'))
         {	
           throw new Exception("Validation Error!! Username and Password not match");
         }
         else{
-          $session = $users[$usrFind];
-          unset($session['password']);
-          $session['candidateName'] = $this->input->post('name');
-          $session['isLogin'] = 1;
-          $this->session->set_userdata($session);
           return TRUE;
         }
       }
@@ -78,7 +61,6 @@ class Login extends CI_Controller {
 		{
 			redirect('login');
 		}
-
 		
 		try{
 			$this->form_validation->set_rules('name', 'Candidate Name', 'required|trim');
@@ -93,6 +75,51 @@ class Login extends CI_Controller {
 			}
 			else
 			{
+        // Set Session
+        $this->load->model('loginmodel');
+        $user = $this->loginmodel->checkUsername($this->input->post('username'))[0];
+
+        if($user->isLogin == 1)
+        {
+          if(!empty($user->lastLogin))
+          {
+            $lastLogin = strtotime($user->lastLogin);
+            $twoHour = strtotime("-2 Hours");
+            //print_r($lastLogin);exit();
+            // Less than 2 hour session exist. Can;t Login
+            if($lastlogin >= $twoHour){
+              throw new Exception("User Already Login!");
+            }            
+            
+          }else{
+            throw new Exception("User Already Login!");            
+          }          
+        }
+        
+        $session = array();
+        
+        if($this->input->post('username') == $user->makerUsername){
+          $session = array(
+            'userid' => $user->id,
+            'candidateName' => $user->candidateName,
+            'username' => $user->makerUsername,
+            'role' => 'maker',
+            'isLogin' => 1
+          );
+          $this->loginmodel->update_entry($user->id,array('lastLogin' => date("Y-m-d H:m:s",time()),'isLogin'=> 1), array('makerUsername' => $this->input->post('username')));
+        }elseif($this->input->post('username') == $user->checkerUsername){
+          $session = array(
+            'userid' => $user->id,
+            'candidateName' => $user->candidateName,
+            'username' => $user->checkerUsername,
+            'role' => 'checker',
+            'isLogin' => 1
+          );
+          $this->loginmodel->update_entry($user->id,array('lastLogin' => date("Y-m-d H:m:s",time()),'isLogin'=> 1), array('checkerUsername' => $this->input->post('username')));
+        }else{
+          throw new Exception("Validation Error !");
+        }
+        $this->session->set_userdata($session);
 				redirect("home");
 			}
 		
