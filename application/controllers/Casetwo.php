@@ -54,8 +54,10 @@ class Casetwo extends CI_Controller {
   }
   
   function checker(){
-    $this->load->model("caseonemodel");
-    $this->load->view('casewrapper',array_merge($this->contentData,array('fetchdata' => $this->caseonemodel->get_entries())));
+    $this->load->model("casetwomodel");
+    $this->fetchData = (array('balance' => $this->casetwomodel->get_sumBallance()));
+    
+    $this->load->view('casewrapper',array_merge($this->contentData,array('fetchdata' => $this->fetchData)));
   }
   
   // Data Fetch
@@ -68,7 +70,8 @@ class Casetwo extends CI_Controller {
                 ->set_content_type('application/json')
                 ->set_status_header(200)
                 ->set_output(json_encode(array(
-                        'data' => $data
+                        'data' => $data,
+                        'role' => $this->session->role
                 ))); 
     }catch(Exception $e){
       return $this->output
@@ -105,28 +108,108 @@ class Casetwo extends CI_Controller {
   
   
   // Post Actions
-  function makerDoPost(){
-    $rules = array(
-        array(
-                'field' => 'type',
-                'label' => 'Type',
-                'rules' => 'required|in_list[plus,minus]'
-        ),
-        array(
-                'field' => 'amount',
-                'label' => 'Amount',
-                'rules' => 'required|numeric|greater_than[0]|less_than_equal_to[999999999]|regex_match[/^[0-9]+$/]|callback_balanceChecker'
-        ),
-        array(
-                'field' => 'description',
-                'label' => 'Descriptions',
-                'rules' => 'required|max_length[50]|min_length[0]'
-        )
-    );
-    
-    $this->form_validation->set_rules($rules);
-    
+  function makerDoCancel($id){
+    if (!$this->input->is_ajax_request()) {
+       exit('No direct script access allowed');
+    }
     try{
+      if($this->session->role != 'maker')
+      {
+        throw new Exception("Session Rejected");
+      }
+      
+      //$this->form_validation->set_rules('id', 'ID', 'required|greater_than[0]|numeric');
+      if (!is_numeric($id) || $id <= 0 || is_null($id))
+      {
+        throw new Exception("Validation Error");
+      }
+      else
+      {
+        $this->load->model('casetwomodel');
+        if(!$this->casetwomodel->delete_entry($id))
+        {
+          throw new Exception("Database Issue");
+        }
+        else
+        {
+          return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode(array(
+                        'text' => 'Success Delete The Record!'
+                )));
+        }        
+      }
+      
+    }catch(Exception $e){
+      log_message('error',$e->getMessage());
+      if($e->getMessage() == 'Validation Error')
+      {        
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(400)
+              ->set_output(json_encode(array(
+                      'text' => 'Validation Broke!',
+                      'errorMessage' => "Record Not Valid"
+              )));
+      }elseif($e->getMessage() == 'Database Issue'){
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(400)
+              ->set_output(json_encode(array(
+                      'text' => 'Failed to update to Database!',
+                      'errorMessage' => "Please Contact Administrator"
+              )));
+      }elseif($e->getMessage() == 'Session Rejected')
+      {
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(403)
+              ->set_output(json_encode(array(
+                      'text' => 'Forbidden!',
+                      'errorMessage' => "Please re-login"
+              )));
+      }else{
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(500)
+              ->set_output(json_encode(array(
+                      'text' => 'General Error!',
+                      'errorMessage' => "Please Contact Administrator"
+              )));
+      }
+    }
+  }
+  
+  function makerDoPost(){
+    if (!$this->input->is_ajax_request()) {
+       exit('No direct script access allowed');
+    }
+    try{
+      if($this->session->role != 'maker')
+      {
+        throw new Exception("Session Rejected");
+      }
+      $rules = array(
+          array(
+                  'field' => 'type',
+                  'label' => 'Type',
+                  'rules' => 'required|in_list[plus,minus]'
+          ),
+          array(
+                  'field' => 'amount',
+                  'label' => 'Amount',
+                  'rules' => 'required|numeric|greater_than[0]|less_than_equal_to[999999999]|regex_match[/^[0-9]+$/]|callback_balanceChecker'
+          ),
+          array(
+                  'field' => 'description',
+                  'label' => 'Descriptions',
+                  'rules' => 'required|max_length[50]|min_length[0]'
+          )
+      );
+      
+      $this->form_validation->set_rules($rules);
+    
       if ($this->form_validation->run() == FALSE)
       {
         throw new Exception("Validation Error");
@@ -187,6 +270,15 @@ class Casetwo extends CI_Controller {
               ->set_output(json_encode(array(
                       'text' => 'Failed to update to Database!',
                       'errorMessage' => "Please Contact Administrator"
+              )));
+      }elseif($e->getMessage() == 'Session Rejected')
+      {
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(403)
+              ->set_output(json_encode(array(
+                      'text' => 'Forbidden!',
+                      'errorMessage' => "Please re-login"
               )));
       }else{
         return $this->output

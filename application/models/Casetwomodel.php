@@ -84,5 +84,19 @@ class Casetwomodel extends CI_Model {
           }          
           return TRUE;
         }
+        
+        public function delete_entry($id)
+        {
+          $this->db->trans_start();
+          $this->db->delete($this->dbName, array('id' => $id,'status' => 'pending'));
+          $this->db->trans_complete();
+
+          if ($this->db->trans_status() === FALSE)
+          {
+            log_message('error',$this->db->error());
+            return FALSE;
+          }          
+          return TRUE;
+        }
 
 }

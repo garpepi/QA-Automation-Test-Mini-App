@@ -6,7 +6,7 @@
         <div class="row no-gutters align-items-center">
           <div class="col mr-2">
             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Ballance</div>
-            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo number_format($fetchdata['balance']->amount)?></div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800"><span id="totalApprovedBalance"><?php echo number_format($fetchdata['balance']->amount)?></span></div>
           </div>
           <div class="col-auto">
             <i class="fas fa-coins fa-2x text-gray-300"></i>
@@ -24,7 +24,7 @@ if($this->session->role == 'maker')
 <!-- Input Form -->
 <div class="row">
   <div class="col-lg-6 mb-4">
-    <p>
+    <p id="newForm">
       <a class="btn btn-info btn-icon-split" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
         <span class="icon text-white-50">
           <i class="fas fa-info-circle"></i>
@@ -62,7 +62,7 @@ if($this->session->role == 'maker')
                   </div>
                 </form>
               </div>
-              <div class="col-lg-6 col-xl-6 col-md-6 d-flex align-items-center text-center">            
+              <div class="col-lg-6 col-xl-6 col-md-6 d-flex align-items-center text-center">
                 <button class="btn btn-success btn-icon-split" id="formActionSubmit" type="submit" form="actionForm">
                   <span class="icon text-white-50">
                     <i class="fas fa-check"></i>
@@ -107,7 +107,7 @@ if($this->session->role == 'maker')
                 <td>999,999,999</td>
                 <td>Enter my description 50 character in here... Yuhuu</td>
                 <td>Approve</td>
-                <!--
+                
                 <td>
                   <?php
                   if($this->session->role == 'maker')
@@ -144,7 +144,7 @@ if($this->session->role == 'maker')
                   }
                   ?>
                 </td>
-                -->
+                
               </tr>
             </tbody>
           </table>
