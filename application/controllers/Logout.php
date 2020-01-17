@@ -14,7 +14,7 @@ class Logout extends CI_Controller {
   {
     parent::__construct();
     $this->load->model('loginmodel');
-    $this->loginmodel->update_entry($this->session->userid,array('lastLogin' => date("Y-m-d HH:mm:ss",time()),'isLogin'=> 1 ));
+    $this->loginmodel->update_entry($this->session->userid,array('lastLogin' => date("Y-m-d H:m:s",time()),'isLogin'=> 1 ));
 
     $this->session->sess_destroy();
     

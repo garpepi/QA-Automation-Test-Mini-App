@@ -29,6 +29,17 @@
     <span aria-hidden="true">&times;</span>
   </button>
 </div>');?>
+     <?php
+      if($this->session->flashdata('error'))
+      {
+        ?>
+      <div class="alert alert-warning alert-dismissible fade show" role="alert"><?php echo $this->session->flashdata('error');?><button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <?php
+      }
+     ?>
     </div>
     
     <!-- Outer Row -->

@@ -61,7 +61,7 @@ class Login extends CI_Controller {
 		{
 			redirect('login');
 		}
-		
+		$lastlogin ='';
 		try{
 			$this->form_validation->set_rules('name', 'Candidate Name', 'required|trim');
       $this->form_validation->set_rules('username', 'Username', 'required|trim');
@@ -84,13 +84,13 @@ class Login extends CI_Controller {
           if(!empty($user->lastLogin))
           {
             $lastLogin = strtotime($user->lastLogin);
-            $twoHour = strtotime("-2 Hours");
-            //print_r($lastLogin);exit();
-            // Less than 2 hour session exist. Can;t Login
-            if($lastlogin >= $twoHour){
-              throw new Exception("User Already Login!");
-            }            
+            $twoHour = strtotime("2 Hours");
             
+            // Less than 2 hour session exist. Can;t Login
+            
+            if($lastlogin <= $twoHour){
+              throw new Exception("User Already Login!");
+            }
           }else{
             throw new Exception("User Already Login!");            
           }          
@@ -125,6 +125,7 @@ class Login extends CI_Controller {
 		
 		}catch(Exception $e)
 		{
+      $this->session->set_flashdata('error', $e->getMessage());
 			log_message('error',$e->getMessage());
 			$this->load->view('login');
 		}
