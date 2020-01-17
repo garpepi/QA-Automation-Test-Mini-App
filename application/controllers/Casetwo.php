@@ -84,30 +84,114 @@ class Casetwo extends CI_Controller {
     }
   }
   
-  // Callback
-  function balanceChecker()
-  {
+  public function TotalBalanceFetch(){
     $this->load->model("casetwomodel");
     
-    $balance = $this->casetwomodel->get_sumBallance()->amount;
-    $amount = $this->input->post('amount');
-    
-    if($this->input->post('type') == 'minus')
-    {
-      $amount = $amount * -1;
+    try{
+      return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode(array(
+                        'amount' => $this->casetwomodel->get_sumBallance()->amount
+                ))); 
+    }catch(Exception $e){
+      return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode(array(
+                    'text' => 'Data Fetch Failed!',
+                    'errorMessage' => "Please Contact Administrator"
+            )));
     }
-
-    if($balance + $amount < 0 || $balance + $amount > 999999999)
-    {
-      log_message('error', 'Amount '.$this->input->post('type').' Balance more than 999,999,999 or less than 0!!');
-      $this->form_validation->set_message('balanceChecker', 'Amount '.$this->input->post('type').' Balance more than 999,999,999 or less than 0!!');
-      return FALSE;
-    }
-    return TRUE;
-  }
-  
+  }  
   
   // Post Actions
+  function checkerDoAccRecj($id,$stat){
+    if (!$this->input->is_ajax_request()) {
+       exit('No direct script access allowed');
+    }
+    
+    try{
+      if($this->session->role != 'checker')
+      {
+        throw new Exception("Session Rejected");
+      }
+      
+      if ('acc' == $stat && !$this->balanceCheckerPriv($id))
+      {
+        throw new Exception("More than total balance");
+      }
+      
+      if (!is_numeric($id) || $id <= 0 || is_null($id) || !in_array($stat,array('acc','rjt')))
+      {
+        throw new Exception("Validation Error");
+      }
+      else
+      {
+        $this->load->model('casetwomodel');
+        if(!$this->casetwomodel->update_entry($id,array('status' => ($stat = 'acc' ? "Approved" : "Rejected")),array('status' => 'Pending')))
+        {
+          throw new Exception("Database Issue");
+        }
+        else
+        {
+          return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode(array(
+                        'text' => 'Success Update The Record!'
+                )));
+        }        
+      }
+      
+    }catch(Exception $e){
+      log_message('error',$e->getMessage());
+      if($e->getMessage() == 'Validation Error')
+      {        
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(400)
+              ->set_output(json_encode(array(
+                      'text' => 'Validation Broke!',
+                      'errorMessage' => "Record Not Valid"
+              )));
+      }elseif($e->getMessage() == 'Database Issue'){
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(400)
+              ->set_output(json_encode(array(
+                      'text' => 'Failed to update to Database!',
+                      'errorMessage' => "Please Contact Administrator"
+              )));
+      }elseif($e->getMessage() == 'Session Rejected')
+      {
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(403)
+              ->set_output(json_encode(array(
+                      'text' => 'Forbidden!',
+                      'errorMessage' => "Please re-login"
+              )));
+      }elseif($e->getMessage() == 'More than total balance'){
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(400)
+              ->set_output(json_encode(array(
+                      'text' => 'Validation Error!',
+                      'errorMessage' => "Balance add with approved amount cannot be more than 999,999,999 or less than 0!"
+              )));
+      }else{
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(500)
+              ->set_output(json_encode(array(
+                      'text' => 'General Error!',
+                      'errorMessage' => "Please Contact Administrator"
+              )));
+      }
+    }
+  }
+  
   function makerDoCancel($id){
     if (!$this->input->is_ajax_request()) {
        exit('No direct script access allowed');
@@ -290,5 +374,47 @@ class Casetwo extends CI_Controller {
               )));
       }
     }    
+  }
+  
+  // Callback & functions
+  function balanceChecker()
+  {
+    $this->load->model("casetwomodel");
+    
+    $balance = $this->casetwomodel->get_sumBallance()->amount;
+    $amount = $this->input->post('amount');
+    
+    if($this->input->post('type') == 'minus')
+    {
+      $amount = $amount * -1;
+    }
+
+    if($balance + $amount < 0 || $balance + $amount > 999999999)
+    {
+      log_message('error', 'Amount '.$this->input->post('type').' Balance more than 999,999,999 or less than 0!!');
+      $this->form_validation->set_message('balanceChecker', 'Amount '.$this->input->post('type').' Balance more than 999,999,999 or less than 0!!');
+      return FALSE;
+    }
+    return TRUE;
+  }
+  
+  function balanceCheckerPriv($id)
+  {
+    $this->load->model("casetwomodel");
+    
+    $balance = $this->casetwomodel->get_sumBallance()->amount;
+    $entry = $this->casetwomodel->get_one_entries(array('id' => $id));
+    $amount = $entry->amount;
+    
+    if($entry->type == 'minus')
+    {
+      $amount = $amount * -1;
+    }
+   
+    if($balance + $amount < 0 || $balance + $amount > 999999999)
+    {
+      return FALSE;
+    }
+    return TRUE;
   }
 }

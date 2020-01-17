@@ -24,8 +24,8 @@ if($this->session->role == 'maker')
 <!-- Input Form -->
 <div class="row">
   <div class="col-lg-6 mb-4">
-    <p id="newForm">
-      <a class="btn btn-info btn-icon-split" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+    <p>
+      <a id="newForm" class="btn btn-info btn-icon-split" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
         <span class="icon text-white-50">
           <i class="fas fa-info-circle"></i>
         </span>

@@ -1,6 +1,7 @@
 $(document).ready(function() {
   var id = 0;
   var role = '';
+  var isFormCollapse = false;
   
   var table = $('#dataTableTransactions').DataTable({
       "ajax": {
@@ -137,18 +138,49 @@ $(document).ready(function() {
   
   $('#dataTableTransactions tbody').on( 'click', 'button.approveRow', function () {
     var tr = $(this).closest('tr');
-    console.log( table.row( tr ).data() );
+    var data = table.row( tr ).data(); 
+    id = data.id;
+    $.ajax({    
+        url: '/casetwo/checkerDoAccRecj/'+id+'/acc',
+        success:function(data){
+          //  json response
+          successDiv(data.text);
+          table.ajax.reload();
+          updateTotalBalance();
+          id = 0;
+        },
+        error: function(data) { 
+          // if error occured
+          errorDiv(data.responseJSON);
+        }
+      });
   });
   
   $('#dataTableTransactions tbody').on( 'click', 'button.rejectRow', function () {
     var tr = $(this).closest('tr');
-    console.log( table.row( tr ).data() );
+    var data = table.row( tr ).data(); 
+    id = data.id;
+    $.ajax({    
+        url: '/casetwo/checkerDoAccRecj/'+id+'/rjt',
+        success:function(data){
+          //  json response
+          successDiv(data.text);
+          table.ajax.reload();
+          updateTotalBalance();
+          id = 0;
+        },
+        error: function(data) { 
+          // if error occured
+          errorDiv(data.responseJSON);
+        }
+      });
   });
   
   $('#newForm').click(function(){
-    id = 0;
+     id = 0;
     // Reset The Form
     $('#actionForm').trigger("reset");
+
   });
   
   $('#actionForm').submit(function(event){
@@ -249,6 +281,7 @@ $(document).ready(function() {
   function pushForm(data)
   {
     id = data.id;
+    
     if(data.type == 'plus')
     {
       $('#addRadio').click(); 
@@ -258,8 +291,22 @@ $(document).ready(function() {
     $('#amount').val(data.amount);
     $('#description').val(data.description);
     $('#status').val(data.status);
-    
+
     $('#collapseExample').collapse('show');
+  }
+  
+  function updateTotalBalance(){
+    $.ajax({    
+        url: '/casetwo/TotalBalanceFetch',
+        success:function(data){
+          //  json response
+          $('#totalApprovedBalance').text(addCommas(data.amount));
+        },
+        error: function(data) { 
+          // if error occured
+          errorDiv(data.responseJSON);
+        }
+      });
   }
 
 

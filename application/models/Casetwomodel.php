@@ -16,7 +16,17 @@ class Casetwomodel extends CI_Model {
           $this->db->where(array('type' => 'plus','status' => 'Approved' ));
           $this->db->select_sum('amount');
           $query = $this->db->get($this->dbName);
-          return $query->row();
+          $plus = $query->row();
+          
+          $this->db->where(array('type' => 'minus','status' => 'Approved' ));
+          $this->db->select_sum('amount');
+          $query = $this->db->get($this->dbName);
+          $minus = $query->row();
+          
+          $result = $plus;
+          $result->amount = $plus->amount - $minus->amount;
+          
+          return $result;
         }
         
         public function get_entries($where = array())
