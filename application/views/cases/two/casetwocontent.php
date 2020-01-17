@@ -6,7 +6,7 @@
         <div class="row no-gutters align-items-center">
           <div class="col mr-2">
             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Ballance</div>
-            <div class="h5 mb-0 font-weight-bold text-gray-800">999,999,999</div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo number_format($fetchdata['balance']->amount)?></div>
           </div>
           <div class="col-auto">
             <i class="fas fa-coins fa-2x text-gray-300"></i>
@@ -37,20 +37,20 @@ if($this->session->role == 'maker')
         <div class="card-body">
           <div class="row">
               <div class="col-lg-6 col-xl-6 col-md-6">
-                <form>
+                <form id="actionForm">
                   <div class="form-group">
                     <div class="custom-control custom-radio custom-control-inline">
-                      <input name="type" type="radio" id="addRadio" class="custom-control-input" required> 
-                      <label class="custom-control-label text-success" for="addRadio"><i class="fas fa-plus"></i>(Add)</label>
+                      <input name="type" value="plus" type="radio" id="addRadio" class="custom-control-input" required> 
+                      <label class="custom-control-label text-success" for="addRadio"><i class="fas fa-plus"></i>(Plus)</label>
                     </div>
                     <div class="custom-control custom-radio custom-control-inline">
-                      <input name="type" type="radio" id="addExpense" class="custom-control-input" required>
-                      <label class="custom-control-label text-danger" for="addExpense"><i class="fas fa-minus"></i>(Expense)</label>
+                      <input name="type" value="minus" type="radio" id="addExpense" class="custom-control-input" required>
+                      <label class="custom-control-label text-danger" for="addExpense"><i class="fas fa-minus"></i>(Minus)</label>
                     </div>
                   </div>
                   <div class="form-group">
                     <label for="amount">Amount</label>
-                    <input name="amount" type="number" class="form-control" id="amount" placeholder="1000" required>
+                    <input name="amount" type="number" class="form-control" id="amount" min="1" max="999999999" required>
                   </div>
                   <div class="form-group">
                     <label for="description">Description</label>
@@ -58,17 +58,17 @@ if($this->session->role == 'maker')
                   </div>
                   <div class="form-group">
                     <label for="status">Status</label>
-                    <input type="text" class="form-control" id="status" readonly>
+                    <input type="text" class="form-control" id="status" value="" readonly>
                   </div>
                 </form>
               </div>
-              <div class="col-lg-6 col-xl-6 col-md-6 d-flex align-items-center text-center">
-                <a role="button" class="btn btn-success btn-icon-split">
+              <div class="col-lg-6 col-xl-6 col-md-6 d-flex align-items-center text-center">            
+                <button class="btn btn-success btn-icon-split" id="formActionSubmit" type="submit" form="actionForm">
                   <span class="icon text-white-50">
                     <i class="fas fa-check"></i>
                   </span>
                   <span class="text text-white">Ok</span>
-                </a>
+                </button>
               </div>         
           </div>
         </div>          
@@ -107,6 +107,7 @@ if($this->session->role == 'maker')
                 <td>999,999,999</td>
                 <td>Enter my description 50 character in here... Yuhuu</td>
                 <td>Approve</td>
+                <!--
                 <td>
                   <?php
                   if($this->session->role == 'maker')
@@ -143,6 +144,7 @@ if($this->session->role == 'maker')
                   }
                   ?>
                 </td>
+                -->
               </tr>
             </tbody>
           </table>

@@ -17,6 +17,15 @@
 
   <!-- Custom styles for this template-->
   <link href="<?php echo base_url();?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
+  
+  <!-- Custom Javascrip handler -->
+  <?php
+  if($CaseNumber['number'] == 2){
+  ?>
+  <script type="text/javascript" src="<?php echo base_url();?>assets/js/custom/alertCustom.js"></script>
+  <?php
+  }
+  ?>
 
 </head>
 
@@ -141,10 +150,8 @@
         <!-- End of Topbar -->
 
         <!-- Alert -->
-        <?php echo validation_errors('<div class="alert alert-warning alert-dismissible fade show" role="alert">', '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>');?>
+        <div id="all-alert-loc"></div>
+      
         <!-- Begin Page Content -->
         <div class="container-fluid">
 
@@ -161,7 +168,7 @@
                 $this->load->view('checker/caseone',array('fetchdata' => $fetchdata));
               }              
             }elseif($CaseNumber['number'] == 2){
-              $this->load->view('cases/two/casetwocontent');
+              $this->load->view('cases/two/casetwocontent',array('fetchdata' => $fetchdata));
             }
           ?>
             
@@ -277,7 +284,7 @@
       <script src="<?php echo base_url();?>/assets/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
       <!-- Page level custom scripts -->
-      <script src="<?php echo base_url();?>/assets/js/custom/casetwo.js"></script>
+      <script src="<?php echo base_url();?>/assets/js/custom/casetwo.js?nocache"></script>
       
       <!-- Custom Javascript -->
       

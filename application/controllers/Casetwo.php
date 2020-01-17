@@ -11,6 +11,7 @@ class Casetwo extends CI_Controller {
 	 */
   
   private $contentData = array('CaseNumber' => array('word' => 'Two','number' => 2));
+  private $fetchData = array();
   
 	public function __construct()
   {
@@ -46,7 +47,10 @@ class Casetwo extends CI_Controller {
 	}
   
   function maker(){
-    $this->load->view('casewrapper',$this->contentData);
+    $this->load->model("casetwomodel");
+    $this->fetchData = (array('balance' => $this->casetwomodel->get_sumBallance()));
+    
+    $this->load->view('casewrapper',array_merge($this->contentData,array('fetchdata' => $this->fetchData)));
   }
   
   function checker(){
@@ -54,100 +58,69 @@ class Casetwo extends CI_Controller {
     $this->load->view('casewrapper',array_merge($this->contentData,array('fetchdata' => $this->caseonemodel->get_entries())));
   }
   
-  function dataChecker()
-  {
-    $this->load->model("caseonemodel");
+  // Data Fetch
+  public function DataFetch(){
+    $this->load->model("casetwomodel");
     
-    if(empty($this->caseonemodel->get_one_entries(array("id" => $this->input->post("id"),"candidateName" => $this->session->candidateName))))
+    try{
+      $data = $this->casetwomodel->get_entries();
+      return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode(array(
+                        'data' => $data
+                ))); 
+    }catch(Exception $e){
+      return $this->output
+            ->set_content_type('application/json')
+            ->set_status_header(500)
+            ->set_output(json_encode(array(
+                    'text' => 'Data Fetch Failed!',
+                    'errorMessage' => "Please Contact Administrator"
+            )));
+    }
+  }
+  
+  // Callback
+  function balanceChecker()
+  {
+    $this->load->model("casetwomodel");
+    
+    $balance = $this->casetwomodel->get_sumBallance()->amount;
+    $amount = $this->input->post('amount');
+    
+    if($this->input->post('type') == 'minus')
     {
-      log_message('error', 'This data not belongs to your session!!');
-      $this->form_validation->set_message('dataChecker', 'This data not belongs to your session!!');
+      $amount = $amount * -1;
+    }
+
+    if($balance + $amount < 0 || $balance + $amount > 999999999)
+    {
+      log_message('error', 'Amount '.$this->input->post('type').' Balance more than 999,999,999 or less than 0!!');
+      $this->form_validation->set_message('balanceChecker', 'Amount '.$this->input->post('type').' Balance more than 999,999,999 or less than 0!!');
       return FALSE;
     }
     return TRUE;
   }
   
-  function checkerDoPost($aor){
-    try{
-      if($aor == 'accept' || $aor == 'reject')
-      {
-        $this->form_validation->set_rules('id', 'ID', 'required|trim|numeric|callback_dataChecker');
-        if ($this->form_validation->run() == FALSE)
-        {
-          throw new Exception("Validation Error!! ".form_error("id"));
-        }else{
-          $updateData = array(
-            "acceptedFlag" => $aor
-          );
-          $this->load->model("caseonemodel");
-          if($this->caseonemodel->update_entry($this->input->post('id'),$updateData))
-          {
-            return TRUE;
-          }
-          else{
-            throw new Exception("Error when Update DB!!");
-          }
-        }
-      }else{
-        throw new Exception("No Accept or Reject!!");
-      }
-    }catch(Exception $e){
-      log_message('error', $e->getMessage());
-      $this->custom_show_error($e->getMessage(),500);
-    }
-  }
   
-  function custom_show_error( $message , $errorCode)
-  {
-      $status = array();
-      $status["success"] = FALSE;
-      $status["message"] = $message;
-      
-      //header('Cache-Control: no-cache, must-revalidate')
-      //header("Content-Type: application/json");
-      //header("HTTP/1.1 500 Internal Server Error");
-      $this->output->set_status_header(500);
-      
-      echo json_encode($status);
-      exit;
-  } 
-  
+  // Post Actions
   function makerDoPost(){
     $rules = array(
         array(
-                'field' => 'text1',
-                'label' => 'Text 1',
-                'rules' => 'required|alpha_numeric_spaces'
+                'field' => 'type',
+                'label' => 'Type',
+                'rules' => 'required|in_list[plus,minus]'
         ),
         array(
-                'field' => 'text2',
-                'label' => 'Text 2',
-                'rules' => 'required|alpha'
+                'field' => 'amount',
+                'label' => 'Amount',
+                'rules' => 'required|numeric|greater_than[0]|less_than_equal_to[999999999]|regex_match[/^[0-9]+$/]|callback_balanceChecker'
         ),
         array(
-                'field' => 'text3',
-                'label' => 'Text 3',
-                'rules' => 'required|numeric|greater_than[0.99]|regex_match[/^[0-9,]+$/]'
-        ),
-        array(
-                'field' => 'text4',
-                'label' => 'Text 4',
-                'rules' => 'required|valid_email'
-        ),
-        array(
-                'field' => 'options',
-                'label' => '  ',
-                'rules' => 'required'
-        ),
-        array(
-                'field' => 'multipleoptions[]',
-                'label' => 'Multiple select',
-                'rules' => 'required'
-        ),
-        array(
-                'field' => 'alltext',
-                'label' => 'Textarea',
-                'rules' => 'required'
+                'field' => 'description',
+                'label' => 'Descriptions',
+                'rules' => 'required|max_length[50]|min_length[0]'
         )
     );
     
@@ -156,22 +129,74 @@ class Casetwo extends CI_Controller {
     try{
       if ($this->form_validation->run() == FALSE)
       {
-        throw new Exception("Validation Error!!");
+        throw new Exception("Validation Error");
       }
       else
       {
-        $this->load->model("caseonemodel");
-        if($this->caseonemodel->insert_entry($this->input->post()))
+        // Create or Update?
+        $this->load->model('casetwomodel');
+
+        if($this->input->post('id') <= 0)
         {
-          $this->session->set_flashdata('status', 'success');
+          if( $this->casetwomodel->insert_entry($this->input->post()) )
+          {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode(array(
+                        'text' => 'Success Inserting to DB!'
+                )));                  
+          }else{
+            throw new Exception("Database Issue");
+          }  
         }else{
-          $this->session->set_flashdata('status', 'failed');
+          $sanitizeData = $this->input->post();
+          if(isset($sanitizeData['status']))
+          {
+            unset($sanitizeData['status']);
+          }
+          
+          if( $this->casetwomodel->update_entry($this->input->post('id'),$this->input->post(),array('status' => 'Pending')) )
+          {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode(array(
+                        'text' => 'Success Update The Record!'
+                )));                  
+          }else{
+            throw new Exception("Database Issue");
+          }  
         }
-        redirect("caseone");
-        
       }
     }catch(Exception $e){
-      $this->index();
+      log_message('error',$e->getMessage());
+      if($e->getMessage() == 'Validation Error')
+      {        
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(400)
+              ->set_output(json_encode(array(
+                      'text' => 'Validation Broke!',
+                      'errorMessage' => $this->form_validation->error_array()
+              )));
+      }elseif($e->getMessage() == 'Database Issue'){
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(400)
+              ->set_output(json_encode(array(
+                      'text' => 'Failed to update to Database!',
+                      'errorMessage' => "Please Contact Administrator"
+              )));
+      }else{
+        return $this->output
+              ->set_content_type('application/json')
+              ->set_status_header(500)
+              ->set_output(json_encode(array(
+                      'text' => 'General Error!',
+                      'errorMessage' => "Please Contact Administrator"
+              )));
+      }
     }    
   }
 }
